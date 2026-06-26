@@ -1,0 +1,6 @@
+parameter.id;data;node.id;subscription.id!
+service:registry:harbor:url;http://localhost:8120;service:registry:harbor:dig;
+service:registry:harbor:user;junit;service:registry:harbor:dig;
+service:registry:harbor:password;secret;service:registry:harbor:dig;
+service:registry:harbor:type;docker;;1
+service:registry:harbor:registry;ligoj;;1

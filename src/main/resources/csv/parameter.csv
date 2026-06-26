@@ -1,0 +1,6 @@
+id;owner.id;data;mandatory;type;mode;secured;defaultValue;availableForSubscription;availableForNode
+service:registry:harbor:url;service:registry:harbor;;true;TEXT;;;;FALSE;
+service:registry:harbor:user;service:registry:harbor;;true;TEXT;;;;FALSE;
+service:registry:harbor:password;service:registry:harbor;;true;TEXT;;true;;FALSE;
+service:registry:harbor:type;service:registry:harbor;["docker"];true;SELECT;;;docker;;FALSE
+service:registry:harbor:registry;service:registry:harbor;;true;TEXT;;;;;FALSE
