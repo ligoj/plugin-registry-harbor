@@ -8,5 +8,6 @@ export default {
   "service:registry:harbor:type": "Type d'artefact",
   "service:registry:harbor:type-description": "Fixé à Docker pour Harbor",
   "service:registry:harbor:registry": "Registre",
-  "service:registry:harbor:registry-description": "Projet Harbor hébergeant les artefacts"
+  "service:registry:harbor:registry-description": "Projet Harbor hébergeant les artefacts",
+  "service:registry:harbor:repositories": "Dépôts"
 }
