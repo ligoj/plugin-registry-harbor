@@ -10,7 +10,11 @@ import { pluginRegistry, useI18nStore } from '@ligoj/host'
 import def from '../index.js'
 import parentDef from '../../../../plugin-registry/ui/src/index.js'
 
-beforeEach(() => { setActivePinia(createPinia()) })
+// The type icon in the chip is the shared RegistryTypeIcon, drawn by the parent
+// plugin-registry via its `renderTypeIcon` feature — register the parent so the
+// tool can resolve it (as at runtime, where the parent is always loaded).
+beforeEach(() => { setActivePinia(createPinia()); pluginRegistry.register('registry', parentDef) })
+afterEach(() => { pluginRegistry.remove('registry') })
 
 /** Extract the mdi icon name from a renderServiceLink (VBtn) or renderDetailsChip (VChip) vnode. */
 function iconOf(vnode) {
@@ -22,9 +26,11 @@ function iconOf(vnode) {
 // renderDetailsKey now returns a VTooltip wrapping a chip activator.
 const chipOf = (tooltip) => tooltip.children.activator({ props: {} })
 const linesOf = (tooltip) => tooltip.children.default()
-const chipIcon = (chip) => chip.children.default()[0].children.default()
 const chipText = (chip) => { const k = chip.children.default(); return k[k.length - 1] }
-const vIcon = (iconVNode) => iconVNode.children.default()
+// The type icon is the shared RegistryTypeIcon; assert the artifact `type` handed
+// to it (the type→mdi mapping is verified in plugin-registry's own tests).
+const chipType = (chip) => chip.children.default()[0].props.type
+const lineType = (iconVNode) => iconVNode.props.type
 
 describe('plugin-registry-harbor manifest', () => {
   it('exposes a valid tool-level manifest', () => {
@@ -76,24 +82,35 @@ describe('plugin-registry-harbor manifest', () => {
     const byIndex = def.feature('renderDetailsKey', { parameters: { 'service:registry:harbor:registry': 'library', 'service:registry:harbor:type': '0' } })
     expect(byIndex.__v_isVNode).toBe(true)
     const chip = chipOf(byIndex)
-    expect(chipIcon(chip)).toBe('mdi-docker')
+    expect(chipType(chip)).toBe('docker')
     expect(chipText(chip)).toBe('library')
     const lines = linesOf(byIndex)
     expect(lines).toHaveLength(2)
     expect(lines[0].children[1]).toBe('docker')
-    expect(vIcon(lines[0].children[0])).toBe('mdi-docker')
+    expect(lineType(lines[0].children[0])).toBe('docker')
     expect(lines[1].children).toBe('library')
     // Value given directly resolves the same way.
-    expect(chipIcon(chipOf(def.feature('renderDetailsKey', { parameters: { 'service:registry:harbor:registry': 'x', 'service:registry:harbor:type': 'docker' } })))).toBe('mdi-docker')
+    expect(chipType(chipOf(def.feature('renderDetailsKey', { parameters: { 'service:registry:harbor:registry': 'x', 'service:registry:harbor:type': 'docker' } })))).toBe('docker')
   })
 
-  it('renderDetailsKey falls back to a generic icon + single-line tooltip when the type is absent', () => {
+  it('renderDetailsKey passes an empty type through with a single-line tooltip when absent', () => {
     def.install()
     const noType = def.feature('renderDetailsKey', { parameters: { 'service:registry:harbor:registry': 'library' } })
-    expect(chipIcon(chipOf(noType))).toBe('mdi-package-variant')
+    expect(chipType(chipOf(noType))).toBe('')  // no type → empty string handed to the shared icon
     const lines = linesOf(noType)
     expect(lines).toHaveLength(1)
     expect(lines[0].children).toBe('library')
+  })
+
+  it('renderDetailsKey renders a generic package icon when the parent cannot provide one', () => {
+    def.install()
+    const params = { 'service:registry:harbor:registry': 'library', 'service:registry:harbor:type': 'docker' }
+    const iconName = (tooltip) => chipOf(tooltip).children.default()[0].children.default()
+    pluginRegistry.remove('registry')  // parent not loaded
+    expect(iconName(def.feature('renderDetailsKey', { parameters: params }))).toBe('mdi-package-variant')
+    // older parent bundle without the renderTypeIcon feature (feature() throws)
+    pluginRegistry.register('registry', { id: 'registry', feature: () => { throw new Error('no feature "renderTypeIcon"') } })
+    expect(iconName(def.feature('renderDetailsKey', { parameters: params }))).toBe('mdi-package-variant')
   })
 
   it('renderDetailsKey returns null without a registry', () => {
