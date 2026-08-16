@@ -1,17 +1,7 @@
 package org.ligoj.app.plugin.registry.harbor;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.ligoj.app.api.SubscriptionStatusWithData;
@@ -28,9 +18,14 @@ import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Harbor (CNCF) artifact registry resource. Harbor is a container
@@ -116,7 +111,7 @@ public class HarborPluginResource extends AbstractToolPluginResource implements 
 	 * Validate the subscription registry (the Harbor project) and return its
 	 * matching projects. Throws when the project cannot be resolved.
 	 */
-	private List<HarborProject> validateRegistry(final Map<String, String> parameters) throws IOException {
+	private List<HarborProject> validateRegistry(final Map<String, String> parameters) {
 		final var registry = parameters.get(PARAMETER_REGISTRY);
 		final var request = new CurlRequest(HttpMethod.GET,
 				getBaseUrl(parameters) + "/api/v2.0/projects?name=" + registry, null);
@@ -129,7 +124,7 @@ public class HarborPluginResource extends AbstractToolPluginResource implements 
 			throw new ValidationJsonException(PARAMETER_REGISTRY, "harbor-registry", registry);
 		}
 		final List<HarborProject> projects = objectMapper.readValue(
-				StringUtils.defaultIfBlank(request.getResponse(), "[]"), new TypeReference<List<HarborProject>>() {
+				StringUtils.defaultIfBlank(request.getResponse(), "[]"), new TypeReference<>() {
 					// Nothing to extend
 				});
 		if (projects.isEmpty()) {
@@ -144,7 +139,7 @@ public class HarborPluginResource extends AbstractToolPluginResource implements 
 	}
 
 	@Override
-	public SubscriptionStatusWithData checkSubscriptionStatus(final Map<String, String> parameters) throws IOException {
+	public SubscriptionStatusWithData checkSubscriptionStatus(final Map<String, String> parameters) {
 		final var status = new SubscriptionStatusWithData();
 		final var project = validateRegistry(parameters).getFirst();
 		status.put("id", project.getProjectId());
@@ -158,12 +153,11 @@ public class HarborPluginResource extends AbstractToolPluginResource implements 
 	 * @param node     The node identifier holding the registry parameters.
 	 * @param criteria The search criteria.
 	 * @return The matching project names.
-	 * @throws IOException When the Harbor response cannot be read.
 	 */
 	@GET
 	@Path("{node}/{criteria}")
 	public List<NamedBean<String>> findAllByName(@PathParam("node") final String node,
-			@PathParam("criteria") final String criteria) throws IOException {
+			@PathParam("criteria") final String criteria) {
 		final var parameters = pvResource.getNodeParameters(node);
 		final var request = new CurlRequest(HttpMethod.GET,
 				getBaseUrl(parameters) + "/api/v2.0/projects?q=name=~" + criteria, null);
@@ -174,7 +168,7 @@ public class HarborPluginResource extends AbstractToolPluginResource implements 
 		}
 		if (found) {
 			final List<HarborProject> projects = objectMapper.readValue(
-					StringUtils.defaultIfBlank(request.getResponse(), "[]"), new TypeReference<List<HarborProject>>() {
+					StringUtils.defaultIfBlank(request.getResponse(), "[]"), new TypeReference<>() {
 						// Nothing to extend
 					});
 			return inMemoryPagination
