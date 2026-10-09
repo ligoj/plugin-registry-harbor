@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.registry.harbor;
+package org.ligoj.app.plugin.harbor;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -7,7 +7,7 @@ import org.apache.commons.lang3.Strings;
 import org.ligoj.app.api.SubscriptionStatusWithData;
 import org.ligoj.app.plugin.registry.RegistryResource;
 import org.ligoj.app.plugin.registry.RegistryServicePlugin;
-import org.ligoj.app.plugin.registry.harbor.client.HarborProject;
+import org.ligoj.app.plugin.harbor.client.HarborProject;
 import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.curl.AuthCurlProcessor;

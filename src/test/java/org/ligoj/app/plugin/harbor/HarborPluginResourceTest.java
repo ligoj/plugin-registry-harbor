@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.registry.harbor;
+package org.ligoj.app.plugin.harbor;
 
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.IOUtils;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.model.*;
+import org.ligoj.app.plugin.harbor.HarborPluginResource;
 import org.ligoj.app.resource.subscription.SubscriptionResource;
 import org.ligoj.bootstrap.MatcherUtil;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;

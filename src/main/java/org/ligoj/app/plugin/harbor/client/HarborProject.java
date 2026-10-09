@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.registry.harbor.client;
+package org.ligoj.app.plugin.harbor.client;
 
 import org.ligoj.bootstrap.core.NamedBean;
 
